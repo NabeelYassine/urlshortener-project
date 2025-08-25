@@ -1,32 +1,148 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener Microservice</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>URL Shortener Microservice</h1>
+            <p class="subtitle">Shorten long URLs to make them easier to share</p>
+        </header>
+        
+        <div class="content">
+            <div class="card">
+                <h2><i class="fas fa-info-circle"></i> About This Service</h2>
+                <p>This URL shortener service allows you to create shortened versions of long URLs. It's a solution for the FreeCodeCamp Back End Development and APIs certification project.</p>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-link"></i> Shorten a URL</h2>
+                <p>Enter a valid URL to create a shortened version:</p>
+                
+                <div class="input-area">
+                    <input type="text" id="urlInput" placeholder="https://example.com">
+                    <button id="shortenBtn">Shorten URL</button>
+                </div>
+                
+                <div class="output" id="output">
+// Results will appear here...
+// Example:
+// {
+//   "original_url": "https://freeCodeCamp.org",
+//   "short_url": 1
+// }
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-road"></i> API Usage</h2>
+                <p>Use these endpoints to shorten URLs and access them:</p>
+                
+                <div class="examples">
+                    <div class="example">
+                        <h3><i class="fas fa-paper-plane"></i> Shorten URL</h3>
+                        <div class="endpoint">POST /api/shorturl</div>
+                        <p>Submit a URL to shorten. Returns a JSON object with original_url and short_url properties.</p>
+                    </div>
+                    
+                    <div class="example">
+                        <h3><i class="fas fa-exchange-alt"></i> Redirect Short URL</h3>
+                        <div class="endpoint">GET /api/shorturl/1</div>
+                        <p>Visit a short URL to be redirected to the original website.</p>
+                    </div>
+                    
+                    <div class="example">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Error Response</h3>
+                        <div class="example-response">{
+  "error": "invalid url"
+}</div>
+                        <p>If you pass an invalid URL, the API will return an error response.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-lightbulb"></i> Example Usage</h2>
+                <div class="examples">
+                    <div class="example">
+                        <h3><i class="fas fa-terminal"></i> Using curl</h3>
+                        <div class="endpoint">curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "url=https://freeCodeCamp.org" http://localhost:3000/api/shorturl</div>
+                    </div>
+                    
+                    <div class="example">
+                        <h3><i class="fas fa-code"></i> JavaScript Fetch</h3>
+                        <div class="example-response">fetch('/api/shorturl', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded'
+  },
+  body: 'url=https://freeCodeCamp.org'
+})
+.then(response => response.json())
+.then(data => console.log(data));</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>&copy; 2025, Nabeel Yassine. All Rights Reserved.</p>
+            <p>Developed as part of the FreeCodeCamp Back End Development and APIs Certification</p>
+        </footer>
+    </div>
 
-<html>
-  <head>
-    <title>URL Shortener Microservice | freeCodeCamp.org</title>
-    <link
-      rel="icon"
-      type="image/png"
-      href="https://cdn.freecodecamp.org/universal/favicons/favicon-16x16.png"
-    />
-    <link href="/public/style.css" rel="stylesheet" type="text/css" />
-  </head>
-
-  <body>
-    <h1>URL Shortener Microservice</h1>
-    <main>
-      <section>
-        <form action="api/shorturl" method="POST">
-          <fieldset>
-            <legend>URL Shortener</legend>
-            <label for="url_input">URL:</label>
-            <input id="url_input" type="text" name="url" placeholder="https://www.freecodecamp.org/" />
-            <input type="submit" value="POST URL" />
-          </fieldset>
-        </form>
-      </section>
-    </main>
-    <footer>
-      <p>By <a href="https://www.freecodecamp.org/">freeCodeCamp</a></p>
-    </footer>
-  </body>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlInput = document.getElementById('urlInput');
+            const shortenBtn = document.getElementById('shortenBtn');
+            const output = document.getElementById('output');
+            
+            // Function to handle URL shortening
+            async function shortenUrl() {
+                const url = urlInput.value.trim();
+                
+                if (!url) {
+                    output.innerHTML = `<span class="error">Please enter a URL</span>`;
+                    return;
+                }
+                
+                try {
+                    output.textContent = "Shortening URL...";
+                    
+                    const response = await fetch('/api/shorturl', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: `url=${encodeURIComponent(url)}`
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        output.innerHTML = `<span class="error">Error: ${data.error}</span>`;
+                    } else {
+                        output.innerHTML = `<span class="success">URL shortened successfully!</span>\n\n${JSON.stringify(data, null, 2)}\n\nShort URL: <a href="/api/shorturl/${data.short_url}" target="_blank">/api/shorturl/${data.short_url}</a>`;
+                    }
+                } catch (error) {
+                    output.innerHTML = `<span class="error">Network Error: Could not connect to the API</span>`;
+                }
+            }
+            
+            // Event listeners
+            shortenBtn.addEventListener('click', shortenUrl);
+            
+            urlInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    shortenUrl();
+                }
+            });
+        });
+    </script>
+</body>
 </html>
